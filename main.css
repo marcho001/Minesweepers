@@ -23,11 +23,13 @@
 .wrap {
   display: flex;
   flex-direction: column;  
-  border:1px solid;
+  border:3px solid;
+  border-radius: 2%;
 }
 
 #game-status {
-  border: 1px solid;
+  border-radius: 2%;
+  border: 3px solid;
   margin: 10px;
   padding: 5px;
   height: 60px;
@@ -39,7 +41,7 @@
 #total-bomb {
   display: flex;
   justify-content: center;
-  width: 70px;
+  width: 65px;
   border: 2px solid;
   border-radius: 15%;
   height: 40px;
@@ -47,6 +49,7 @@
 }
 
 #face {
+  border-radius: 15%;
   border: 1px solid;
   height: 35px;
   width: 35px;
@@ -58,20 +61,19 @@
   justify-content: center;
   border: 2px solid;
   border-radius: 15%;
-  width: 70px;
+  width: 65px;
   height: 40px;
   
 }
 
-.num-count {
-  
+.num-count { 
   font-size: 25px;
-
 }
 
 #bomb-field {
   display: grid;
-  border: 1px solid;
+  border: 3px solid;
+  border-radius: 2%;
   margin: 0 10px 10px 10px;
   max-width: 600px;
   
@@ -80,15 +82,17 @@
 .field {
   text-align: center;
   border: 1px solid;
+  border-radius: 3%;
+  font-weight: 800;
 }
 
 .undig {
-
-  background-color: rgb(238, 237, 237);
-  box-shadow: -3px -2px 3px rgba(0, 0, 0, 0.7);
+  /* border-top: rgb(233, 13, 13); */
+  background-color: rgba(245, 245, 245, 0.632);
+  box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.8);
 
 }
 
 .dig {
-  background-color: rgb(182, 182, 182);
+  background-color: rgb(182, 182, 182,0.632);
 }

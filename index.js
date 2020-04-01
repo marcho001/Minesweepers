@@ -45,8 +45,7 @@ const view = {
    */
   // 應該要能 點擊格子remove .undig 插入innerHTML 所以field 要傳什麼才能連結到model
   // 傳入e.target 用e.target.id 找model.fields
-  showFieldContent(target) { 
-    
+  showFieldContent(target) {  
       switch (model.fields[target.id].type) {
         case 'Bomb':
           target.innerHTML = '<i class="fas fa-bomb"></i>'
@@ -87,8 +86,18 @@ const controller = {
     if(numberOfRows < 6) numberOfRows = 6
     model.totalRows = numberOfRows
     model.totalBombs = numberOfMines
+    
     view.displayFields(numberOfRows)
     controller.setMinesAndFields(numberOfMines)
+    controller.getFieldData()
+
+    document.querySelectorAll('.field').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.target.classList.remove('undig')
+        e.target.classList.add('dig')
+        view.showFieldContent(e.target)
+      },{once:1})
+    })
    },
 
   /**
@@ -100,11 +109,6 @@ const controller = {
     // set model.mines
     model.setBombsData(numberOfMines)
     // display bombs icon
-    // model.setFieldsData(model.totalRows)
-
-    view.showFieldContent(model.fields)
-
-
 
   },
    
@@ -257,7 +261,7 @@ const utility = {
   }
 }
 
-controller.createGame(13, 12)
+controller.createGame(10, 99)
 
 
 
