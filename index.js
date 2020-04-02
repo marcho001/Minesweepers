@@ -2,29 +2,25 @@
 
 const gameData = {
   gameStatus:document.querySelector('#game-status'),
-  bombField:document.querySelector('#bomb-field')
+  bombField:document.querySelector('#bomb-field'),
 }
 
 
 const view = {
-  /**
-   * displayFields()
-   * 顯示踩地雷的遊戲版圖在畫面上，
-   * 輸入的 rows 是指版圖的行列數。
-   */displayGameStatus(){
+    //渲染遊戲狀態 
+   displayGameStatus(){
      gameData.gameStatus.innerHTML = `
         <div id="total-bomb">
-          <div class="num-count">0</div>
-                   
+          <div id="bomb-count" class="num-count">0</div>
         </div>
         <div id="face"></div>
         <div id="time">
-          <div class="num-count">0</div>
-          <div class="num-count">0</div>
-          <div class="num-count">0</div>
+          <div id="time-count-2" class="num-count">0</div>
+          <div id="time-count-3" class="num-count">0</div>
         </div>`
         return
    },
+  //  渲染格子
   displayFields(rows) {
     view.displayGameStatus()
     if(rows < 6) rows = 6
@@ -39,10 +35,7 @@ const view = {
     })
 
    },
-  /**
-   * showFieldContent()
-   * 更改單一格子的內容，像是顯示數字、地雷，或是海洋。
-   */
+  
   // 應該要能 點擊格子remove .undig 插入innerHTML 所以field 要傳什麼才能連結到model
   // 傳入e.target 用e.target.id 找model.fields
   showFieldContent(target) {  
@@ -69,12 +62,23 @@ const view = {
    * renderTime()
    * 顯示經過的遊戲時間在畫面上。
    */
-  renderTime(time) { },
+  renderTime(time) {
+    
+    let digiSecond = document.querySelector('#time-count-3')
+    let tensSecond = document.querySelector('#time-count-2')
+    let newTime = Math.floor((Date.now()-time)/1000)
+    
+    digiSecond.innerText = newTime % 10
+    tensSecond.innerText = Math.floor(newTime / 10)
+    
+    
+    
 
-  /**
-   * showBoard()
-   * 遊戲結束時，或是 debug 時將遊戲的全部格子內容顯示出來。
-   */
+    
+    
+   },
+
+  // 將所有格子全部點開 炸彈加上紅色背景
   showBoard() {
     document.querySelectorAll('.field').forEach(i => {
       i.classList.remove('undig')
@@ -101,6 +105,7 @@ const controller = {
    */
   createGame(numberOfRows, numberOfMines) {
     
+    
     if(numberOfRows < 6) numberOfRows = 6
     model.totalRows = numberOfRows
     model.totalBombs = numberOfMines
@@ -108,7 +113,11 @@ const controller = {
     view.displayFields(numberOfRows)
     this.setMinesAndFields(numberOfMines)
     this.getFieldData()
-
+    
+    let a = setInterval(() => {
+      view.renderTime(model.time)
+    }, 300)
+    // 設定type 綁定監聽
     document.querySelectorAll('.field').forEach(item => {
       item.dataset.type = model.fields[item.id].type
       if(item.classList.contains('undig')){
@@ -131,24 +140,12 @@ const controller = {
 
   },
    
-
-  /**
-   * getFieldData()
-   * 取得單一格子的內容，決定這個格子是海洋還是號碼，
-   * 如果是號碼的話，要算出這個號碼是幾號。
-   * （計算周圍地雷的數量）
-   */
+  // 輸入model資料
   getFieldData(fieldIdx) {    
     model.setFieldsData(model.totalRows)
    },
 
-  /**
-   * dig()
-   * 使用者挖格子時要執行的函式，
-   * 會根據挖下的格子內容不同，執行不同的動作，
-   * 如果是號碼或海洋 => 顯示格子
-   * 如果是地雷      => 遊戲結束
-   */
+// 依照 type 決定渲染的樣子
   dig(field) {   
     if(field.target.dataset.type === 'Bomb'){
       view.showFieldContent(field.target)
@@ -161,21 +158,24 @@ const controller = {
     }
     
    },
-
+  //  如果點擊海洋 展開附近海洋
   spreadOcean(field) {
     let [row, col] = [model.fields[field.id].positionOfRows, model.fields[field.id].positionOfCols]
     let arround = []
+    // 找出目標周圍八個位置的節點
     document.querySelectorAll('.field').forEach(item =>{
       if(model.getAround(row, col).includes(item.dataset.position)){
         arround.push(item)
       }
     })
-
+    // 檢查八個節點
     arround.forEach(item =>{
+      // 如果是ocean 而且"還沒點開 " 將item點開 並帶入spreadocean 再去找他周圍8個
       if(item.dataset.type ==='Ocean' && item.classList.contains('undig')){
         item.classList.remove('undig')
         item.classList.add('dig')
         controller.spreadOcean(item)
+        // 如果是number 點開輸入數字
       } else if (item.dataset.type === 'Number' && item.classList.contains('undig')){
         item.classList.remove('undig')
         item.classList.add('dig')
@@ -189,32 +189,25 @@ const controller = {
 const model = {
   totalRows:0,
   totalBombs:0,
+  time:Date.now(),
+  
 
   /**
    * mines
    * 存放地雷的編號（第幾個格子）
    */
   mines: [],
-  /**
-   * fields
-   * 存放格子內容，這裡同學可以自行設計格子的資料型態，
-   * 例如：
-   * {
-   *   type: "number",
-   *   number: 1,
-   *   isDigged: false
-   * }
-   */
+  
+    // fields
+    // 存放格子內容，這裡同學可以自行設計格子的資料型態
+   
   fields: [],
 
-  /**
-   * isMine()
-   * 輸入一個格子編號，並檢查這個編號是否是地雷
-   */
+  // 檢查參數是否為炸彈
   isMine(fieldIdx) {
     return this.mines.includes(fieldIdx)
   },
-
+  // 用隨機洗牌產生炸彈的id
   setBombsData(numberOfMines){
     let bombNum = 0
     utility.getRandomNumberArray(Math.pow(model.totalRows, 2)).forEach(item => {
@@ -223,7 +216,7 @@ const model = {
         bombNum++
       }}
     )},
-// 給fields data
+// 初始化fields data 的原型
   initFields(){
     document.querySelectorAll('.field').forEach(item =>{
       let data = {type:'',id:item.id,position:'',positionOfRows:0,positionOfCols:0,isDigged:0,numOfBomb:0}
@@ -231,14 +224,18 @@ const model = {
     })
   
   },
+  // 輸入model.fields 資料
   setFieldsData(totalRows){
+    // 先輸入炸彈type 將numOfBomb 改成''
     model.mines.forEach(item => {
       model.fields[item].type = 'Bomb'
       model.fields[item].numOfBomb = ''
     })
-
+    // 輸入其他資料
     model.fields.forEach(item=>{
+      // 如果type 不是炸彈 先改為ocean 等輸入numOfBomb 再改
       if(item.type === '') item.type = 'Ocean'
+      // 用id算出位置
       item.positionOfRows = (Math.floor(item.id / totalRows)) + 1
       item.positionOfCols = (item.id % totalRows) + 1
       item.position =`${item.positionOfRows}-${item.positionOfCols}`
