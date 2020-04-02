@@ -34,7 +34,7 @@ const view = {
     gameData.bombField.style.gridTemplateRows = `${'30px '.repeat(rows)}`
     
     field.forEach(item => {
-      gameData.bombField.innerHTML += `<div class="field undig" data-position='${ (Math.floor(item / rows)) + 1 }-${ (item % rows) + 1 }' id=${item}></div>
+      gameData.bombField.innerHTML += `<div class="field undig" data-position='${ (Math.floor(item / rows)) + 1 }-${ (item % rows) + 1 }' data-type='' id=${item}></div>
       `
     })
 
@@ -46,13 +46,20 @@ const view = {
   // 應該要能 點擊格子remove .undig 插入innerHTML 所以field 要傳什麼才能連結到model
   // 傳入e.target 用e.target.id 找model.fields
   showFieldContent(target) {  
-      switch (model.fields[target.id].type) {
+      switch (target.dataset.type) {
         case 'Bomb':
+          target.classList.remove('undig')
+          target.classList.add('dig')
           target.innerHTML = '<i class="fas fa-bomb"></i>'
+          alert('Game Over!!')
+          view.showBoard()          
           break
         case 'Number':
+          target.classList.remove('undig')
+          target.classList.add('dig')
           target.innerHTML = `${model.fields[target.id].numOfBomb}`
           break
+
       }
     
     
@@ -68,7 +75,18 @@ const view = {
    * showBoard()
    * 遊戲結束時，或是 debug 時將遊戲的全部格子內容顯示出來。
    */
-  showBoard() { }
+  showBoard() {
+    document.querySelectorAll('.field').forEach(i => {
+      i.classList.remove('undig')
+      i.classList.add('dig')
+      if (i.dataset.type === 'Bomb') {
+        i.style.backgroundColor = '#ef0e0e'
+        i.innerHTML = '<i class="fas fa-bomb"></i>'
+      } else if (i.dataset.type === 'Number') {
+        i.innerHTML = `${model.fields[i.id].numOfBomb}`
+      }
+    })
+   }
 }
 
 const controller = {
@@ -88,15 +106,16 @@ const controller = {
     model.totalBombs = numberOfMines
     
     view.displayFields(numberOfRows)
-    controller.setMinesAndFields(numberOfMines)
-    controller.getFieldData()
+    this.setMinesAndFields(numberOfMines)
+    this.getFieldData()
 
     document.querySelectorAll('.field').forEach(item => {
-      item.addEventListener('click', (e) => {
-        e.target.classList.remove('undig')
-        e.target.classList.add('dig')
-        view.showFieldContent(e.target)
-      },{once:1})
+      item.dataset.type = model.fields[item.id].type
+      if(item.classList.contains('undig')){
+        item.addEventListener('click', controller.dig
+        ,{once:1})
+      }
+      
     })
    },
 
@@ -119,8 +138,7 @@ const controller = {
    * 如果是號碼的話，要算出這個號碼是幾號。
    * （計算周圍地雷的數量）
    */
-  getFieldData(fieldIdx) {
-    
+  getFieldData(fieldIdx) {    
     model.setFieldsData(model.totalRows)
    },
 
@@ -131,9 +149,41 @@ const controller = {
    * 如果是號碼或海洋 => 顯示格子
    * 如果是地雷      => 遊戲結束
    */
-  dig(field) { }
+  dig(field) {   
+    if(field.target.dataset.type === 'Bomb'){
+      view.showFieldContent(field.target)
+    } else if(field.target.dataset.type === 'Number'){
+      view.showFieldContent(field.target)
+    } else if (field.target.dataset.type === 'Ocean'){
+      field.target.classList.remove('undig')
+      field.target.classList.add('dig')
+      controller.spreadOcean(field.target)
+    }
+    
+   },
 
-  // spreadOcean(field) {}
+  spreadOcean(field) {
+    let [row, col] = [model.fields[field.id].positionOfRows, model.fields[field.id].positionOfCols]
+    let arround = []
+    document.querySelectorAll('.field').forEach(item =>{
+      if(model.getAround(row, col).includes(item.dataset.position)){
+        arround.push(item)
+      }
+    })
+
+    arround.forEach(item =>{
+      if(item.dataset.type ==='Ocean' && item.classList.contains('undig')){
+        item.classList.remove('undig')
+        item.classList.add('dig')
+        controller.spreadOcean(item)
+      } else if (item.dataset.type === 'Number' && item.classList.contains('undig')){
+        item.classList.remove('undig')
+        item.classList.add('dig')
+        item.innerHTML = `${model.fields[item.id].numOfBomb}`
+      }
+    })
+
+  }
 }
 
 const model = {
@@ -194,39 +244,28 @@ const model = {
       item.position =`${item.positionOfRows}-${item.positionOfCols}`
     })
     model.getBombPosition()
-
   },
+// 找出炸彈位置 將炸彈周圍八格塞入numOfBomb
   getBombPosition(){
+    // 從model.fields 中 找出"所有"炸彈所在的資料
     let bomb = model.fields.filter(item => model.isMine(Number(item.id)))
-
     let arr = []
-
-    bomb.forEach(item => {
-      let [row, col] = [Number(item.positionOfRows), Number(item.positionOfCols)]
-      
-      for (let i = row - 1; i <= row + 1; i++) {
-        for (let j = col - 1; j <= col + 1; j++) {
-          if (i === row && j === col) { 
-
-          } else {
-              if(i>0&&i<=model.totalRows){
-                if (j > 0 && j <= model.totalRows){
-                  arr.push(`${i}-${j}`)
-                }                
-              }
-// 變成 i-j 再從fied foreach找定位 +1
-             }
-        }
-      }      
+    // 將"所有"炸彈周圍八個position 換成array 塞到arr 裡面
+    bomb.forEach(item => {  
+      arr.push(...model.getAround(Number(item.positionOfRows),Number(item.positionOfCols)))      
     }) 
-   
+    
     model.fields.forEach(item => {
       let bombNum = 0
+      // 如果arr 包含item.position 代表周圍有炸彈
       if (arr.includes(item.position)){
+        // 每出現一次 代表有一顆炸彈 用filter 跟length 算出有幾顆
         bombNum = arr.filter(i => i === item.position).length
+        // 如果numOfBomb = '' 代表本身為炸彈
         if(item.numOfBomb === ''){
           
         } else{
+          // 將炸彈數量和type 輸入到model.fileds裡
           item.numOfBomb += bombNum
           item.type = 'Number'
         }
@@ -234,6 +273,26 @@ const model = {
       }
     })
     
+  },
+
+  // 找出目標位置周圍八個格子的position
+  getAround(row, col){
+    let arr =[]
+    for (let i = row - 1; i <= row + 1; i++) {
+      for (let j = col - 1; j <= col + 1; j++) {
+        if (i === row && j === col) {
+
+        } else {
+          if (i > 0 && i <= model.totalRows) {
+            if (j > 0 && j <= model.totalRows) {
+              arr.push(`${i}-${j}`)
+            }
+          }
+          // 變成 i-j 再從fied foreach找定位 +1
+        }
+      }
+    } 
+    return arr
   }
 
 
@@ -243,13 +302,7 @@ const model = {
 }
 
 const utility = {
-  /**
-   * getRandomNumberArray()
-   * 取得一個隨機排列的、範圍從 0 到 count參數 的數字陣列。
-   * 例如：
-   *   getRandomNumberArray(4)
-   *     - [3, 0, 1, 2]
-   */
+  
   getRandomNumberArray(count) {
     const number = [...Array(count).keys()]
     for (let index = number.length - 1; index > 0; index--) {
@@ -261,7 +314,7 @@ const utility = {
   }
 }
 
-controller.createGame(10, 99)
+controller.createGame(10, 10)
 
 
 
