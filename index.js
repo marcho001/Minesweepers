@@ -1,11 +1,7 @@
-
-
 const gameData = {
   gameStatus:document.querySelector('#game-status'),
   bombField:document.querySelector('#bomb-field'),
 }
-
-
 const view = {
     //渲染遊戲狀態 
    displayGameStatus(){
@@ -102,6 +98,10 @@ const view = {
   // 將所有格子全部點開 炸彈加上紅色背景
   showBoard() {
     document.querySelectorAll('.field').forEach(i => {
+      if(i.classList.contains('flag')){
+        i.classList.remove('flag')
+
+      }
       i.classList.remove('undig')
       i.classList.add('dig')
       if (i.dataset.type === 'Bomb') {
@@ -133,7 +133,7 @@ const view = {
           e.target.classList.remove('flag')
           e.target.classList.add('undig')
           e.target.innerHTML = ''
-        } else if (e.target.tagName === 'I') {
+        } else if (e.target.classList.contains('fa - flag')) {
           bombNum++
           view.renderBomb(bombNum)
           e.target.parentElement.classList.remove('flag')
@@ -167,18 +167,22 @@ const controller = {
     this.getFieldData()
     view.renderBomb(model.totalBombs)
     controller.debug()
-    
-    
+    view.putFlag(model.totalBombs)
     // 設定type 綁定監聽
     document.querySelectorAll('.field').forEach(item => {
       item.dataset.type = model.fields[item.id].type
       if(item.classList.contains('undig')){
         item.addEventListener('click', controller.dig
         )
-      }
-      
+      }   
     })
-    view.putFlag(model.totalBombs)
+
+    document.querySelector('#face-icon').addEventListener('click', () => {
+      gameData.bombField.innerHTML = ''
+      model.restart()
+      controller.createGame(9, 12)})
+    
+
     // 可以任何地方插旗
     // 拔其後一樣可以按
     // 已經打開的地方不能插旗
@@ -273,6 +277,10 @@ const controller = {
   debug(){
     document.querySelector('#debug-button').addEventListener('click',()=>{
       document.querySelectorAll('.field').forEach(i=>{
+        if(i.classList.contains('flag')){
+          i.classList.remove('flag')
+          i.innerHTML = ''
+        }
         i.classList.remove('undig')
         i.classList.add('dig')
         if(i.dataset.type === 'Bomb'){
@@ -302,11 +310,14 @@ const model = {
   fields: [],
   restart(){
     model.totalRows = 0
-    totalBombs = 0
-    totalOcean = 0
-    totalNumber = 0
-    time = 0
-    clock = ''
+    model.totalBombs = 0
+    model.totalOcean = 0
+    model.totalNumber = 0
+    model.time = 0
+    clearInterval(model.clock)
+    model.clock = ''
+    model.mines = []
+    model.fields = []
   },
 
   // 檢查參數是否為炸彈
