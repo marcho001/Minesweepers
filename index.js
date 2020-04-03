@@ -111,7 +111,38 @@ const view = {
         i.innerHTML = `${model.fields[i.id].numOfBomb}`
       }
     })
-   }
+   },
+  putFlag(index) {
+    let bombNum = index
+    let flag = '<i class="fas fa-flag"></i>'
+    document.querySelectorAll('.field').forEach(i => {
+      i.addEventListener('contextmenu', (e) => {
+        e.preventDefault()
+
+        if (e.target.classList.contains('undig') && bombNum > 0) {
+          if (!e.target.classList.contains('flag')) {
+            bombNum--
+            view.renderBomb(bombNum)
+            e.target.classList.add('flag')
+            e.target.classList.remove('undig')
+            e.target.innerHTML = flag
+          }
+        } else if (e.target.classList.contains('flag')) {
+          bombNum++
+          view.renderBomb(bombNum)
+          e.target.classList.remove('flag')
+          e.target.classList.add('undig')
+          e.target.innerHTML = ''
+        } else if (e.target.tagName === 'I') {
+          bombNum++
+          view.renderBomb(bombNum)
+          e.target.parentElement.classList.remove('flag')
+          e.target.parentElement.classList.add('undig')
+          e.target.parentElement.innerHTML = ''
+        }
+      })
+    })
+  },
 }
 
 const controller = {
@@ -143,10 +174,16 @@ const controller = {
       item.dataset.type = model.fields[item.id].type
       if(item.classList.contains('undig')){
         item.addEventListener('click', controller.dig
-        ,{once:1})
+        )
       }
       
     })
+    view.putFlag(model.totalBombs)
+    // 可以任何地方插旗
+    // 拔其後一樣可以按
+    // 已經打開的地方不能插旗
+    // 插旗後炸彈--
+    
    },
 
   /**
@@ -168,15 +205,26 @@ const controller = {
 
 // 依照 type 決定渲染的樣子
   dig(field) {   
-    view.renderFace(field.target.dataset.type)
-    if(field.target.dataset.type === 'Bomb'){
+    if (field.target.dataset.type === 'Bomb' && field.target.classList.contains('undig')){
+      view.renderFace(field.target.dataset.type)
       view.showFieldContent(field.target)
       clearInterval(model.clock)
-    } else if(field.target.dataset.type === 'Number'){
+    } else if(field.target.dataset.type === 'Number' && field.target.classList.contains('undig')){
+      model.totalNumber ++
+
+      controller.gameFinish(model.totalNumber, model.totalOcean, model.totalRows, model.totalBombs)
+
+      view.renderFace(field.target.dataset.type)
       view.showFieldContent(field.target)
-    } else if (field.target.dataset.type === 'Ocean'){
+
+    } else if (field.target.dataset.type === 'Ocean' && field.target.classList.contains('undig')){
+      model.totalOcean ++
+
+      controller.gameFinish(model.totalNumber, model.totalOcean, model.totalRows, model.totalBombs)
+
       field.target.classList.remove('undig')
       field.target.classList.add('dig')
+      view.renderFace(field.target.dataset.type)
       controller.spreadOcean(field.target)
     }
     if(field.target.dataset.type ==='Number' || field.target.dataset.type ==='Ocean'){
@@ -204,16 +252,21 @@ const controller = {
     // 檢查八個節點
     arround.forEach(item =>{
       // 如果是ocean 而且"還沒點開 " 將item點開 並帶入spreadocean 再去找他周圍8個
-      if(item.dataset.type ==='Ocean' && item.classList.contains('undig')){
+      if(item.classList.contains('undig') && !item.classList.contains('flag')){
+        if(item.dataset.type ==='Ocean'){
+        model.totalOcean ++
         item.classList.remove('undig')
         item.classList.add('dig')
         controller.spreadOcean(item)
         // 如果是number 點開輸入數字
-      } else if (item.dataset.type === 'Number' && item.classList.contains('undig')){
+      } else if (item.dataset.type === 'Number'){
+        model.totalNumber ++
         item.classList.remove('undig')
         item.classList.add('dig')
         item.innerHTML = `${model.fields[item.id].numOfBomb}`
       }
+      }
+      
     })
 
   },
@@ -229,26 +282,32 @@ const controller = {
         }
       })        
     })
+  },
+  gameFinish(num, ocean, row, bomb){
+    if(num + ocean === Math.pow(row,2) - bomb ){
+      clearInterval(model.clock)
+      alert('Finish')
+    }
   }
 }
 
 const model = {
   totalRows:0,
   totalBombs:0,
+  totalOcean:0,
+  totalNumber:0,
   time:0,
   clock: '',
-  
-
-  /**
-   * mines
-   * 存放地雷的編號（第幾個格子）
-   */
   mines: [],
-  
-    // fields
-    // 存放格子內容，這裡同學可以自行設計格子的資料型態
-   
   fields: [],
+  restart(){
+    model.totalRows = 0
+    totalBombs = 0
+    totalOcean = 0
+    totalNumber = 0
+    time = 0
+    clock = ''
+  },
 
   // 檢查參數是否為炸彈
   isMine(fieldIdx) {
@@ -338,11 +397,6 @@ const model = {
     } 
     return arr
   }
-
-
-  
-  
-
 }
 
 const utility = {
@@ -358,7 +412,7 @@ const utility = {
   }
 }
 
-controller.createGame(10, 10)
+controller.createGame(9, 10)
 
 
 
