@@ -13,7 +13,9 @@ const view = {
         <div id="total-bomb">
           <div id="bomb-count" class="num-count">0</div>
         </div>
-        <div id="face"></div>
+        <div id="face">
+        <div id="face-icon">😁</div>
+        </div>
         <div id="time">
           <div id="time-count-2" class="num-count">0</div>
           <div id="time-count-3" class="num-count">0</div>
@@ -72,10 +74,29 @@ const view = {
     tensSecond.innerText = Math.floor(newTime / 10)
     
     
-    
+    if(tensSecond.innerText > 99){
+      tensSecond.innerText = 0
+    }
 
     
     
+   },
+   renderBomb(num){
+    document.querySelector('#bomb-count').innerText = num
+   },
+   renderFace(index){
+    let face = document.querySelector('#face-icon')
+    switch(index){
+      case 'Number':
+        face.innerText = '\u{1F631}' 
+        break
+      case 'Ocean':
+        face.innerText = '😁'
+        break
+      case 'Bomb':
+        face.innerText = '☠'
+    }
+     
    },
 
   // 將所有格子全部點開 炸彈加上紅色背景
@@ -113,10 +134,10 @@ const controller = {
     view.displayFields(numberOfRows)
     this.setMinesAndFields(numberOfMines)
     this.getFieldData()
+    view.renderBomb(model.totalBombs)
+    controller.debug()
     
-    let a = setInterval(() => {
-      view.renderTime(model.time)
-    }, 300)
+    
     // 設定type 綁定監聽
     document.querySelectorAll('.field').forEach(item => {
       item.dataset.type = model.fields[item.id].type
@@ -141,20 +162,32 @@ const controller = {
   },
    
   // 輸入model資料
-  getFieldData(fieldIdx) {    
+  getFieldData() {    
     model.setFieldsData(model.totalRows)
    },
 
 // 依照 type 決定渲染的樣子
   dig(field) {   
+    view.renderFace(field.target.dataset.type)
     if(field.target.dataset.type === 'Bomb'){
       view.showFieldContent(field.target)
+      clearInterval(model.clock)
     } else if(field.target.dataset.type === 'Number'){
       view.showFieldContent(field.target)
     } else if (field.target.dataset.type === 'Ocean'){
       field.target.classList.remove('undig')
       field.target.classList.add('dig')
       controller.spreadOcean(field.target)
+    }
+    if(field.target.dataset.type ==='Number' || field.target.dataset.type ==='Ocean'){
+      if(model.time === 0){
+        model.time = Date.now()
+        model.clock = setInterval(() => {
+          view.renderTime(model.time)
+        }, 200)
+        
+      } 
+      
     }
     
    },
@@ -183,13 +216,27 @@ const controller = {
       }
     })
 
+  },
+  debug(){
+    document.querySelector('#debug-button').addEventListener('click',()=>{
+      document.querySelectorAll('.field').forEach(i=>{
+        i.classList.remove('undig')
+        i.classList.add('dig')
+        if(i.dataset.type === 'Bomb'){
+          i.innerHTML = '<i class="fas fa-bomb"></i>'
+        } else if(i.dataset.type === 'Number'){
+          i.innerHTML = `${model.fields[i.id].numOfBomb}`
+        }
+      })        
+    })
   }
 }
 
 const model = {
   totalRows:0,
   totalBombs:0,
-  time:Date.now(),
+  time:0,
+  clock: '',
   
 
   /**
