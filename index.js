@@ -1,7 +1,7 @@
 const gameData = {
   gameStatus: document.querySelector('#game-status'),
   bombField: document.querySelector('#bomb-field'),
-  
+
   btnListener(){
     document.querySelector('#easy').addEventListener('click',()=>{
       gameData.bombField.innerHTML = ''
@@ -22,14 +22,18 @@ const gameData = {
       let rows = document.querySelector('#game-rows').value
       let bombs = document.querySelector('#game-bombs').value
       if (!isNaN(Number(rows)) & !isNaN(Number(bombs))){
-        
-        if(Number(bombs) <= 0 || Number(bombs) > Math.pow((rows - 1), 2)){
+        if(rows === '' || bombs === ''){
+
+        } else if(Number(bombs) <= 0 || Number(bombs) > Math.pow((rows - 1), 2)){
+          console.log(bombs)
         alert(`Please enter 1 ~ ${Math.pow((rows - 1), 2)} bombs`)
-      } else {
+        } else if(Number(rows) > 19){
+          alert('Please enter 1 ~ 19 rows')
+        }else {
         gameData.bombField.innerHTML = ''
         model.restart()
         controller.createGame(Number(rows), Number(bombs))
-      }
+        }
       } else{
         alert('Please enter a number')
       }
@@ -59,6 +63,7 @@ const view = {
   displayFields(rows) {
     view.displayGameStatus()
     if (rows < 6) rows = 6
+    if (rows > 19) rows = 19
     let field = Array.from(Array(Math.pow(rows, 2)).keys())
 
     gameData.bombField.style.gridTemplateColumns = `${'30px '.repeat(rows)}`
