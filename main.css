@@ -1,28 +1,86 @@
+body {
+  background: url("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRcJRwULDxpXi9qlHMxBxXcsJKJu1W1_xuv2uFjl2rq-ZWGNBgz&usqp=CAU");
+  
+}
+
+#game {
+  background-color: rgba(255, 255, 255, 0.392);
+}
+
 #setter {
-  margin-top: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 #setter-info {
+  margin-top: 20px;
+  background-color: rgb(209, 207, 207);
   display: flex;
-  flex-direction: column;  
-  border:1px solid;
-  width: 500px;
-  height: 100px;
+  flex-direction: column; 
+  justify-content: space-around;
+  border-radius: 30px;
+  box-shadow: 10px 10px 15px;
+  width: 650px;
+  height: 200px;
 }
 
-#debug {
+#difficaulty {
+  display: flex;
+  justify-content: space-around;
+}
+
+button {
+  width: 100px;
+  height: 35px;
+  border: 2px solid rgb(255, 255, 255);
+  box-shadow: 3px 5px 3px;
+  border-radius: 15px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+#easy {
+  background-color: rgb(105, 201, 27);
+}
+
+#medium {
+  background-color: rgb(238, 183, 1);
+}
+
+#hard {
+  background-color: rgba(242, 67, 3, 0.933);
+}
+
+#text {
+  text-align: center;
+  font-size: 25px;
+  font-weight: 900;
+}
+
+#self-define {
+  display: flex;
+  justify-content: space-around;
+}
+
+#self-define input {
+  width: 130px;
+}
+
+#debug {  
   margin-top: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+#debug button {
+  background-color: rgb(191, 191, 191);
+}
+
 
 #container {
-  margin-top: 40px;
+  margin-top: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -33,6 +91,8 @@
   flex-direction: column;  
   border:3px solid;
   border-radius: 2%;
+  padding: 5px;
+  background-color: rgba(226, 226, 226, 0.766);
 }
 
 #game-status {
@@ -47,11 +107,14 @@
 }
 
 #total-bomb {
+  color: rgb(255, 4, 4);
+  background-color: rgba(6, 6, 6, 0.892);
+  box-shadow: 3px 3px 5px black;
   display: flex;
   justify-content: center;
   width: 65px;
-  border: 2px solid;
-  border-radius: 15%;
+  border: 2px solid white;
+  border-radius: 15px;
   height: 40px;
   
 }
@@ -62,8 +125,6 @@
 
 #face {
   display: flex;
-  border-radius: 15%;
-  /* border: 1px solid; */
   height: 35px;
   width: 35px;
   justify-content: center;
@@ -71,10 +132,13 @@
 }
 
 #time {
+  color: rgb(255, 4, 4);
+  background-color: rgba(6, 6, 6, 0.892);
+  box-shadow: 3px 3px 5px black;
   display: flex;
   justify-content: center;
-  border: 2px solid;
-  border-radius: 15%;
+  border: 2px solid white;
+  border-radius: 15px;
   width: 65px;
   height: 40px;
   
