@@ -84,7 +84,7 @@ const view = {
         target.classList.remove('undig')
         target.classList.add('dig')
         target.innerHTML = '<i class="fas fa-bomb"></i>'
-        alert('Game Over!!')
+        view.showModal()
         view.showBoard()
         break
       case 'Number':
@@ -185,6 +185,31 @@ const view = {
       })
     })
   },
+  addAnimate(){
+    let btns = document.querySelectorAll('button')
+    let fields = document.querySelectorAll('.field')
+
+    btns.forEach(item=>{
+      item.addEventListener('mouseenter',(e)=>{
+        e.target.classList.add('btn-animate')
+      })
+    })
+    btns.forEach(item => {
+      item.addEventListener('mouseleave', (e) => {
+        e.target.classList.remove('btn-animate')
+      })
+    })
+    
+  },
+  showModal(){
+    const modal = document.querySelector('#modal-wrap')
+    modal.style.display = 'flex'
+    modal.addEventListener('click',(e)=>{
+      if(e.target.tagName === 'BUTTON'){
+        modal.style.display = 'none'
+      }
+    })
+  }
 }
 
 const controller = {
@@ -206,6 +231,7 @@ const controller = {
     view.renderBomb(model.totalBombs)
     controller.debug()
     view.putFlag(model.totalBombs)
+    view.addAnimate()
     // 設定type 綁定監聽
     // 第一次點擊之後 才產生model.fields資料 然後設定type
     document.querySelectorAll('.field').forEach(item => {
@@ -264,6 +290,7 @@ const controller = {
     if (field.target.dataset.type === 'Bomb' && field.target.classList.contains('undig')) {
       view.renderFace(field.target.dataset.type)
       view.showFieldContent(field.target)
+      
       clearInterval(model.clock)
     } else if (field.target.dataset.type === 'Number' && field.target.classList.contains('undig')) {
       model.totalNumber++
@@ -328,19 +355,8 @@ const controller = {
   },
   debug() {
     document.querySelector('#debug-button').addEventListener('click', () => {
-      document.querySelectorAll('.field').forEach(i => {
-        if (i.classList.contains('flag')) {
-          i.classList.remove('flag')
-          i.innerHTML = ''
-        }
-        i.classList.remove('undig')
-        i.classList.add('dig')
-        if (i.dataset.type === 'Bomb') {
-          i.innerHTML = '<i class="fas fa-bomb"></i>'
-        } else if (i.dataset.type === 'Number') {
-          i.innerHTML = `${model.fields[i.id].numOfBomb}`
-        }
-      })
+      view.showBoard()
+      clearInterval(model.clock)
     })
   },
   gameFinish(num, ocean, row, bomb) {

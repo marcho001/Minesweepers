@@ -1,6 +1,46 @@
 body {
   background: url("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRcJRwULDxpXi9qlHMxBxXcsJKJu1W1_xuv2uFjl2rq-ZWGNBgz&usqp=CAU");
+  position: relative;
   
+}
+
+#modal-wrap {
+  display: none;
+  justify-content: center;
+}
+
+#modal {
+  width: 900px;
+  height: 450px;
+  position: absolute;
+  top: 200px;
+  border: 1px solid;
+  border-radius: 20px;
+  background-color: gray;
+  display: flex;
+  flex-direction: column;
+}
+
+#modal p {
+  font-size: 40px;
+  align-self: center;
+}
+
+#modal img {
+  width: 95%;
+  align-self: center;
+}
+
+#cancel {
+  outline: none!important;
+  width:  40px;
+  margin: 10px;
+  border: 2px solid rgb(255, 255, 255);
+  box-shadow: 3px 5px 3px;
+  border-radius: 15px;
+  font-size: 20px;
+  font-weight: 700;
+  background-color: rgb(167, 3, 3);
 }
 
 #game {
@@ -31,6 +71,7 @@ body {
 }
 
 button {
+  outline: none!important;
   width: 100px;
   height: 35px;
   border: 2px solid rgb(255, 255, 255);
@@ -39,6 +80,8 @@ button {
   font-size: 20px;
   font-weight: 700;
 }
+
+
 
 #easy {
   background-color: rgb(105, 201, 27);
@@ -163,6 +206,24 @@ button {
   border-radius: 3%;
   font-weight: 800;
 }
+
+.btn-animate {
+  animation-name: btn-animate;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes btn-animate {
+  0% {
+    width: 100px;
+    height: 35px; 
+  }
+  100% {
+    width: 120px;
+    height: 45px; 
+  }
+}
+
 
 .undig {
   background-color: rgba(245, 245, 245, 0.632);
